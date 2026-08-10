@@ -1,8 +1,12 @@
 package com.example.patientservice.mapper;
 
+import com.example.patientservice.dto.PatientRequestDTO;
 import com.example.patientservice.dto.PatientResponseDTO;
 import com.example.patientservice.model.Patient;
 import com.example.patientservice.repository.PatientRepository;
+import org.springframework.cglib.core.Local;
+
+import java.time.LocalDate;
 
 public class PatientMapper {
     public static PatientResponseDTO toDTO(Patient patient){
@@ -15,4 +19,16 @@ public class PatientMapper {
 
         return patientDTO;
     }
+
+    public static Patient toModel(PatientRequestDTO patientRequestDTO){
+        Patient patient = new Patient();
+        patient.setName(patientRequestDTO.getName());
+        patient.setAddress(patientRequestDTO.getAddress());
+        patient.setEmail(patientRequestDTO.getEmail());
+        patient.setDateOfBirth(LocalDate.parse(patientRequestDTO.getDateOfBirth()));
+        patient.setRegisteredDate(LocalDate.parse(patientRequestDTO.getRegisterdDate()));
+
+        return patient;
+    }
+
 }
