@@ -25,7 +25,7 @@ public class PatientService {
                 map(PatientMapper::toDTO).toList();
     }
 
-    public PatientResponseDTO createPatientDTO(PatientRequestDTO patientRequestDTO){
+    public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO){
         Patient newPatient = patientRepository.save(
                 PatientMapper.toModel(patientRequestDTO)
         );
