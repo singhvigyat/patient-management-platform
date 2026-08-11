@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 // this class will help us do error handling outside services & controllers.
 @ControllerAdvice
@@ -34,5 +35,16 @@ public class GlobalExceptionHandler {
         errors.put("message", "Email address already exists");
         return ResponseEntity.badRequest().body(errors);
     }
+
+    @ExceptionHandler(PatientNotFoundException.class)
+    public ResponseEntity<Map<String,String>> handlePatientNotFoundException(PatientNotFoundException ex){
+        log.warn("Patient Not found {}", ex.getMessage());
+
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", "Patient Not found");
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+
 
 }
