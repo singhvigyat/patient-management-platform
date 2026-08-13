@@ -4,13 +4,11 @@ import com.example.patientservice.dto.PatientRequestDTO;
 import com.example.patientservice.dto.PatientResponseDTO;
 import com.example.patientservice.dto.validators.CreatePatientValidationGroup;
 import com.example.patientservice.service.PatientService;
-import jakarta.validation.Valid;
 import jakarta.validation.groups.Default;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.DecimalFormat;
 import java.util.List;
 import java.util.UUID;
 
