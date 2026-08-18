@@ -1,6 +1,6 @@
 package com.example.patientservice.dto;
 
-// return only what's needed, in model we also have registerDate, but we are not returning
+// return only what's needed, in model we also have registeredDate, but we are not returning
 // that back, because that doesn't make any sense, to be in DTO, that's only there
 // for auditing purposes, & to be stored in the database.
 public class PatientResponseDTO {
