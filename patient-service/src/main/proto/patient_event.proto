@@ -1,0 +1,14 @@
+// this will define the format of the request a kafka producer will make.
+
+syntax = "proto3";
+package patient.events;
+
+option java_multiple_files = true;  // this tells maven that we want separate files,
+// instead of everything under one class, this makes our work easier,
+// as everything will be under new file
+
+// define a message
+message PatientEvent{string patientId = 1;
+  string name = 2;
+  string email = 3;
+  string event_type = 4;}
