@@ -21,9 +21,9 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
 
-        Optional<String> tokenOptional = authService.authenticate(loginRequestDTO); // this would be either empty or
-        // it would be containing a string that's why its called Optional, it will return empty(nothing) if the token is not
-        // valid.
+        // Returns a JWT token if credentials are valid.
+        // Returns Optional.empty() if authentication fails.
+        Optional<String> tokenOptional = authService.authenticate(loginRequestDTO);
 
         if(tokenOptional.isEmpty()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
