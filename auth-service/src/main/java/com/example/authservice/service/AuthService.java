@@ -3,6 +3,8 @@ package com.example.authservice.service;
 import com.example.authservice.controller.AuthController;
 import com.example.authservice.dto.LoginRequestDTO;
 import com.example.authservice.model.User;
+import com.example.authservice.util.JwtUtil;
+import io.jsonwebtoken.Jwt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +14,13 @@ import java.util.Optional;
 public class AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    public AuthService(UserService userService, PasswordEncoder passwordEncoder){
+    public AuthService(UserService userService, PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil){
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     public Optional<String > authenticate(LoginRequestDTO loginRequestDTO){
