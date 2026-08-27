@@ -2,10 +2,9 @@ package com.example.authservice.controller;
 
 import com.example.authservice.dto.LoginRequestDTO;
 import com.example.authservice.dto.LoginResponseDTO;
+import com.example.authservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +14,11 @@ import java.util.Optional;
 
 @RestController
 public class AuthController {
+    private final AuthService authService;
 
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @Operation(summary = "Generate token on user login") // for our swagger docs.
     @PostMapping("/login")
@@ -25,7 +28,7 @@ public class AuthController {
         // Returns Optional.empty() if authentication fails.
         Optional<String> tokenOptional = authService.authenticate(loginRequestDTO);
 
-        if(tokenOptional.isEmpty()){
+        if (tokenOptional.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

@@ -10,7 +10,7 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
-@Component // this Registers this class as a java bean or spring bean so that the spring bean knows which class to auto-wire using dependency injection.
+@Component // this Registers this class as a java bean or spring bean so that the spring knows which class to auto-wire using dependency injection.
 public class JwtUtil {
     private final Key secretKey;
 

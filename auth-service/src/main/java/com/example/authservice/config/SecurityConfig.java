@@ -15,8 +15,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        // as we're handling security throught the api gateway, we're going to permit all the
-        // requests in this flow, because we're not exposing auth-service port direclty to the
+        // as we're handling security through the api gateway, we're going to permit all the
+        // requests in this flow, because we're not exposing auth-service port directly to the
         // internet, so we can permit all the request coming to this.
         http.authorizeHttpRequests(authorize -> authorize
                 .anyRequest()
