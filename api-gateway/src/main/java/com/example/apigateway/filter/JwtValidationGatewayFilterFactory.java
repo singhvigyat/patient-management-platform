@@ -11,6 +11,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 // filter class allows us to intercept an http request, apply custom logic
 // & decide whether to proceed with the request or not.
+
+// we have to name this class {<anything>}GatewayFilterFactory, then we can just add
+// {<anything>} in the application.yml filters, on the paths wherever we want this filter to
+// be applied.
 @Component
 public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFactory<Object>{
 
