@@ -20,8 +20,8 @@ This platform splits that problem on purpose:
 
 | Path | Protocol | When it runs | Failure mode |
 |------|----------|--------------|--------------|
-| **Command** — open a billing account | gRPC, blocking stub | Inside the same HTTP request that creates the patient | Billing down → registration fails. Correct. You do not enroll a patient you cannot charge. |
-| **Event** — `PATIENT_CREATED` | Kafka, protobuf bytes on topic `patient` | After persist + billing | Analytics down → patient still exists. Correct. Dashboards can catch up. |
+| **Command:** open a billing account | gRPC, blocking stub | Inside the same HTTP request that creates the patient | Billing down → registration fails. Correct. You do not enroll a patient you cannot charge. |
+| **Event:** `PATIENT_CREATED` | Kafka, protobuf bytes on topic `patient` | After persist + billing | Analytics down → patient still exists. Correct. Dashboards can catch up. |
 
 Two clocks. One source of truth (patient-service). Everything else is a consequence.
 
@@ -76,8 +76,8 @@ Services do not share tables. They share **contracts**: HTTP at the edge, `.prot
 
 | Service | Role | HTTP | Other | Speaks |
 |---------|------|------|-------|--------|
-| **api-gateway** | Single entry. Path routing, prefix strip, JWT gate. | `4004` | — | WebFlux, WebClient |
-| **auth-service** | Issue and verify tokens. Users live here, not in the gateway. | `4005` | — | Spring Security, JJWT 0.12, BCrypt |
+| **api-gateway** | Single entry. Path routing, prefix strip, JWT gate. | `4004` | | WebFlux, WebClient |
+| **auth-service** | Issue and verify tokens. Users live here, not in the gateway. | `4005` | | Spring Security, JJWT 0.12, BCrypt |
 | **patient-service** | Source of truth for patients. Orchestrates billing + events. | `4000` | Kafka producer | JPA, Validation, springdoc OpenAPI |
 | **billing-service** | Billing accounts. Dual stack: REST + gRPC. | `4001` | gRPC `9001` | protobuf, grpc-spring-boot |
 | **analytics-service** | Downstream observer. Deserializes `PatientEvent`. | *(consumer)* | Kafka `localhost:9092` | protobuf |
@@ -91,7 +91,7 @@ Gateway Docker hostname mapping (container network):
 | `/api/patients/**` | `/patients/**` | `patient-service:4000` |
 | `/api-docs/patients` | rewritten → `/v3/api-docs` | `patient-service:4000` |
 
-Patient routes carry the custom filter `JwtValidation`. Auth routes do not — you cannot require a token to obtain a token.
+Patient routes carry the custom filter `JwtValidation`. Auth routes do not. You cannot require a token to obtain a token.
 
 ---
 
@@ -135,7 +135,7 @@ sequenceDiagram
   PAT-->>Client: PatientResponseDTO
 ```
 
-**Order is not accidental.** Persist first (you need an id). gRPC second (billing is on the request path). Kafka third (a failed event must not roll back a patient who already has an account). The producer swallows send errors and logs them — analytics is allowed to miss; billing is not.
+**Order is not accidental.** Persist first (you need an id). gRPC second (billing is on the request path). Kafka third (a failed event must not roll back a patient who already has an account). The producer swallows send errors and logs them. Analytics is allowed to miss; billing is not.
 
 ---
 
@@ -144,8 +144,8 @@ sequenceDiagram
 Billing listens on two ports because two kinds of callers exist.
 
 ```
-:4001  HTTP   — humans, curl, future admin UI
-:9001  gRPC   — patient-service, blocking stub, plaintext channel
+:4001  HTTP   humans, curl, future admin UI
+:9001  gRPC   patient-service, blocking stub, plaintext channel
 ```
 
 Contract (`billing-service` / `patient-service` share the same proto):
@@ -208,7 +208,7 @@ request
         └─ else → request dies at the edge
 ```
 
-Implementation: `JwtValidationGatewayFilterFactory` — Spring Cloud Gateway requires the `*GatewayFilterFactory` suffix so the YAML filter name is just `JwtValidation`.
+Implementation: `JwtValidationGatewayFilterFactory`. Spring Cloud Gateway requires the `*GatewayFilterFactory` suffix so the YAML filter name is just `JwtValidation`.
 
 Auth-service itself **permits all HTTP** and disables CSRF. That is intentional: it is not exposed as a public port. The internet talks to `:4004` only. Tokens are HMAC-signed (JJWT, Base64-decoded secret), 10-hour expiry, claims `sub` = email, `role` = `ADMIN` (seed user). Passwords are BCrypt.
 
@@ -242,7 +242,7 @@ GET http://localhost:4004/auth/validate
 Authorization: Bearer <token>
 ```
 
-### Patients (via gateway — JWT required)
+### Patients (via gateway, JWT required)
 
 ```http
 GET    http://localhost:4004/api/patients
@@ -264,7 +264,7 @@ Create body:
 }
 ```
 
-Update omits `registeredDate` — Bean Validation **groups** (`CreatePatientValidationGroup`) require it only on create. Duplicate email → `400` with `{ "message": "Email address already exists" }`. Unknown UUID → `{ "message": "Patient Not found" }`. Field errors from `@Valid` return a map of field → message. Delete returns `204`.
+Update omits `registeredDate`. Bean Validation **groups** (`CreatePatientValidationGroup`) require it only on create. Duplicate email → `400` with `{ "message": "Email address already exists" }`. Unknown UUID → `{ "message": "Patient Not found" }`. Field errors from `@Valid` return a map of field → message. Delete returns `204`.
 
 Response DTO deliberately drops `registeredDate`. That field is audit data in the table, not API surface.
 
@@ -359,7 +359,7 @@ In Compose / K8s, set:
 **Gateway validates tokens by HTTP, not by sharing the signing key.**  
 Auth remains the only component that knows the secret. Cost: an extra hop on every patient request. Gain: rotate keys in one place; gateway stays protocol-only.
 
-**gRPC for billing, Kafka for analytics — not “Kafka for everything”.**  
+**gRPC for billing, Kafka for analytics. Not "Kafka for everything".**  
 If billing is an event, you get a patient with no account until some consumer runs. That is a product bug dressed up as decoupling. Events are for work that may be late. RPCs are for work that must be true before the response.
 
 **Protobuf on Kafka, not JSON.**  
@@ -381,6 +381,6 @@ Security is an edge concern. Putting a second filter chain on auth-service would
 
 ## What this is not
 
-Not an EHR. Not HIPAA-certified. Billing currently returns a stub account (`accountId=12345`, `status=ACTIVE`) — the RPC boundary is real; the ledger behind it is the next service, not this repo. Analytics logs events; it does not yet persist a warehouse. There is no docker-compose in-tree: each service images itself.
+Not an EHR. Not HIPAA-certified. Billing currently returns a stub account (`accountId=12345`, `status=ACTIVE`). The RPC boundary is real; the ledger behind it is the next service, not this repo. Analytics logs events; it does not yet persist a warehouse. There is no docker-compose in-tree: each service images itself.
 
 The interesting part is already here: **where the write splits**, and **what is allowed to fail**.
